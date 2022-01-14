@@ -72,3 +72,11 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Content to ignore due to size
+**/Content/ParagonMinions
+**/Content/ParagonGideon
+**/Content/ExampleContent
+
+
+
