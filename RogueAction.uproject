@@ -1,13 +1,16 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.27",
+	"EngineAssociation": "{9CEB0655-4EF7-2713-3F02-C8958626B6A9}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
 		{
 			"Name": "RogueAction",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	]
 }
