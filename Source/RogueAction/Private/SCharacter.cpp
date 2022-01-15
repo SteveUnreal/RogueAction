@@ -4,6 +4,7 @@
 #include "SCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework\CharacterMovementComponent.h"
 
 
 
@@ -16,9 +17,14 @@ ASCharacter::ASCharacter()
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
+	SpringArmComp->bUsePawnControlRotation = true;
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	bUseControllerRotationYaw = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 }
 
@@ -31,12 +37,25 @@ void ASCharacter::BeginPlay()
 
 void ASCharacter::MoveForward(float Value)
 {
-	AddMovementInput(GetActorForwardVector(), Value);
+
+	FRotator controlRot = GetControlRotation();
+	controlRot.Pitch = 0.0f;
+	controlRot.Roll = 0.0f;
+
+	AddMovementInput(controlRot.Vector(), Value);
 }
 
 void ASCharacter::MoveRight(float Value)
 {
-	AddMovementInput(GetActorRightVector(), Value);
+
+	FRotator controlRot = GetControlRotation();
+	controlRot.Pitch = 0.0f;
+	controlRot.Roll = 0.0f;
+
+	// From UKismetMathLibrary GetRightVector (Found via shift + alt + s on 'rightvector')
+	FVector RightVector = FRotationMatrix(controlRot).GetScaledAxis(EAxis::Y);
+
+	AddMovementInput(RightVector, Value);
 }
 
 // Called every frame
@@ -54,6 +73,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
 }
 
