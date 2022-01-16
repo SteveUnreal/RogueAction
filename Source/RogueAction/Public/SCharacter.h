@@ -14,6 +14,16 @@ class ROGUEACTION_API ASCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+
+protected:
+
+	// Allows assignment through BP
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditAnywhere)
+	FName PrimarySocketName;
+
 public:
 	// Sets default values for this character's properties
 	ASCharacter();
@@ -32,6 +42,8 @@ protected:
 	void MoveForward(float Value);
 
 	void MoveRight(float Value);
+
+	void PrimaryAttack();
 
 public:	
 	// Called every frame
