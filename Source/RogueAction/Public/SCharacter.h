@@ -8,6 +8,8 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class USInteractionComponent;
+class UAnimMontage;
 
 UCLASS()
 class ROGUEACTION_API ASCharacter : public ACharacter
@@ -18,11 +20,16 @@ class ROGUEACTION_API ASCharacter : public ACharacter
 protected:
 
 	// Allows assignment through BP
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> ProjectileClass;
 
 	UPROPERTY(EditAnywhere)
 	FName PrimarySocketName;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	UAnimMontage* AttackAnim;
+
+	FTimerHandle TimerHandle_PrimaryAttack;
 
 public:
 	// Sets default values for this character's properties
@@ -36,6 +43,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UCameraComponent* CameraComp;
 
+	UPROPERTY(EditDefaultsOnly)
+	USInteractionComponent* InteractionComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -43,7 +53,13 @@ protected:
 
 	void MoveRight(float Value);
 
+	void Jump();
+
 	void PrimaryAttack();
+
+	void PrimaryInteract();
+
+	void PrimaryAttack_TimeElapsed();
 
 public:	
 	// Called every frame

@@ -5,6 +5,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework\CharacterMovementComponent.h"
+#include "SInteractionComponent.h"
+#include "GameFramework/Actor.h"
 
 
 
@@ -21,6 +23,8 @@ ASCharacter::ASCharacter()
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	InteractionComp = CreateDefaultSubobject<USInteractionComponent>(TEXT("InteractionComp"));
 
 	bUseControllerRotationYaw = false;
 
@@ -58,9 +62,38 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);
 }
 
+void ASCharacter::Jump()
+{
+	Super::Jump();
+}
+
 void ASCharacter::PrimaryAttack()
 {
+	PlayAnimMontage(AttackAnim);
 
+	
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+
+	//// To spawn from hand we can select the socket added to a bone or otherwise.
+	//FVector HandLocation = GetMesh()->GetSocketLocation(PrimarySocketName);
+
+	//FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+	//FActorSpawnParameters SpawnParams;
+	//SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	//GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+}
+
+void ASCharacter::PrimaryInteract()
+{
+	if (InteractionComp) {
+		InteractionComp->PrimaryInteract();
+	}
+	
+}
+
+void ASCharacter::PrimaryAttack_TimeElapsed()
+{
 	// To spawn from hand we can select the socket added to a bone or otherwise.
 	FVector HandLocation = GetMesh()->GetSocketLocation(PrimarySocketName);
 
@@ -89,6 +122,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", EInputEvent::IE_Pressed, this, &ASCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ASCharacter::Jump);
+	PlayerInputComponent->BindAction("PrimaryInteract", EInputEvent::IE_Pressed, this, &ASCharacter::PrimaryInteract);
 
 }
 
