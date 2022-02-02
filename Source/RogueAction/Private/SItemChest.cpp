@@ -18,6 +18,8 @@ ASItemChest::ASItemChest()
 
 	TargetPitch = 110.0f;
 
+	bIsOpen = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -36,6 +38,13 @@ void ASItemChest::Tick(float DeltaTime)
 
 void ASItemChest::Interact_Implementation(AActor* InstigatorPawn)
 {
-	ChestLid->SetRelativeRotation(FRotator(TargetPitch, 0.0f, 0.0f));
+	if (bIsOpen) {
+		ChestLid->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+		bIsOpen = false;
+	}
+	else {
+		ChestLid->SetRelativeRotation(FRotator(TargetPitch, 0.0f, 0.0f));
+		bIsOpen = true;
+	}
 }
 

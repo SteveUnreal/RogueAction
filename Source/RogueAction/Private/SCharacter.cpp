@@ -7,6 +7,7 @@
 #include "GameFramework\CharacterMovementComponent.h"
 #include "SInteractionComponent.h"
 #include "GameFramework/Actor.h"
+#include "DrawDebugHelpers.h"
 
 
 
@@ -29,6 +30,8 @@ ASCharacter::ASCharacter()
 	bUseControllerRotationYaw = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	TraceDistance = 10000.0f;
 
 }
 
@@ -84,24 +87,110 @@ void ASCharacter::PrimaryAttack()
 	//GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
+void ASCharacter::SecondaryAttack()
+{
+	PlayAnimMontage(AttackAnim);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::SecondaryAttack_TimeElapsed, 0.2f);
+
+}
+
+void ASCharacter::PrimaryAttack_TimeElapsed()
+{
+
+	// Line trace for impact point
+	FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+
+	// Get Screen center
+	FVector CameraLocation = CameraComp->GetComponentLocation();
+	FRotator CameraRotator = CameraComp->GetComponentRotation();
+
+	FHitResult HitResult;
+	FVector End = CameraLocation + (CameraRotator.Vector() * TraceDistance);
+
+	bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(HitResult, CameraLocation, End, ObjectQueryParams);
+	//DrawDebugLine(GetWorld(), CameraLocation, End, FColor::Red, false, 10.0f);
+
+	// To spawn from hand we can select the socket added to a bone or otherwise.
+	FVector HandLocation = GetMesh()->GetSocketLocation(PrimarySocketName);
+	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+
+
+	if (bBlockingHit) {
+		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 20.0f, 32, FColor::Black, false, 2.0f);
+
+		// Get new rotation
+		FVector NewVec = HitResult.ImpactPoint - HandLocation;
+		SpawnTM = FTransform(NewVec.Rotation(), HandLocation);
+
+	}
+	else {
+		UE_LOG(LogTemp, Log, TEXT("Did not hit anything for aim line trace."));
+
+	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this;
+
+	GetWorld()->SpawnActor<AActor>(PrimaryProjectileClass, SpawnTM, SpawnParams);
+	
+	
+}
+
+void ASCharacter::SecondaryAttack_TimeElapsed()
+{
+
+	// Line trace for impact point
+	FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+
+	// Get Screen center
+	FVector CameraLocation = CameraComp->GetComponentLocation();
+	FRotator CameraRotator = CameraComp->GetComponentRotation();
+
+	FHitResult HitResult;
+	FVector End = CameraLocation + (CameraRotator.Vector() * TraceDistance);
+
+	bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(HitResult, CameraLocation, End, ObjectQueryParams);
+	//DrawDebugLine(GetWorld(), CameraLocation, End, FColor::Red, false, 10.0f);
+
+	// To spawn from hand we can select the socket added to a bone or otherwise.
+	FVector HandLocation = GetMesh()->GetSocketLocation(PrimarySocketName);
+	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+
+
+	if (bBlockingHit) {
+		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 20.0f, 32, FColor::Black, false, 2.0f);
+
+		// Get new rotation
+		FVector NewVec = HitResult.ImpactPoint - HandLocation;
+		SpawnTM = FTransform(NewVec.Rotation(), HandLocation);
+
+	}
+	else {
+		UE_LOG(LogTemp, Log, TEXT("Did not hit anything."));
+
+	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Instigator = this;
+
+	GetWorld()->SpawnActor<AActor>(SecondaryProjectileClass, SpawnTM, SpawnParams);
+
+
+}
+
 void ASCharacter::PrimaryInteract()
 {
 	if (InteractionComp) {
 		InteractionComp->PrimaryInteract();
 	}
-	
-}
 
-void ASCharacter::PrimaryAttack_TimeElapsed()
-{
-	// To spawn from hand we can select the socket added to a bone or otherwise.
-	FVector HandLocation = GetMesh()->GetSocketLocation(PrimarySocketName);
-
-	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
 // Called every frame
@@ -122,6 +211,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", EInputEvent::IE_Pressed, this, &ASCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("SecondaryAttack", EInputEvent::IE_Pressed, this, &ASCharacter::SecondaryAttack);
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ASCharacter::Jump);
 	PlayerInputComponent->BindAction("PrimaryInteract", EInputEvent::IE_Pressed, this, &ASCharacter::PrimaryInteract);
 

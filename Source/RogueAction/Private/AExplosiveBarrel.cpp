@@ -6,6 +6,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/RadialForceComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AAExplosiveBarrel::AAExplosiveBarrel()
@@ -37,13 +38,15 @@ AAExplosiveBarrel::AAExplosiveBarrel()
 	RadialForceComp->SetupAttachment(MeshComp);
 	RadialForceComp->Radius = DamageRadius;
 	RadialForceComp->ImpulseStrength = ImpulseStrength;
-	RadialForceComp->bImpulseVelChange = true;
+	RadialForceComp->bImpulseVelChange = true;  // Takes mass into account
+	RadialForceComp->AddCollisionChannelToAffect(ECC_WorldDynamic);
+	RadialForceComp->SetAutoActivate(false);
 
 
 
 
 
-	MeshComp->OnComponentHit.AddDynamic(this, &AAExplosiveBarrel::BeginOverlap);
+	
 
 }
 
@@ -52,6 +55,12 @@ void AAExplosiveBarrel::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AAExplosiveBarrel::PostInitializeComponents() {
+	Super::PostInitializeComponents();
+
+	MeshComp->OnComponentHit.AddDynamic(this, &AAExplosiveBarrel::BeginOverlap);
 }
 
 void AAExplosiveBarrel::Explode()
@@ -64,6 +73,8 @@ void AAExplosiveBarrel::Explode()
 	// Cause radial damage
 	RadialForceComp->FireImpulse();
 
+	UE_LOG(LogTemp, Log, TEXT("Exploding."));
+
 	// Delete?
 
 
@@ -72,5 +83,8 @@ void AAExplosiveBarrel::Explode()
 void AAExplosiveBarrel::BeginOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Overalp with %s"), *GetNameSafe(OtherActor));
+
+	FString CombinedString = FString::Printf(TEXT("Hit at location: %s"), *Hit.ImpactPoint.ToString());
+	DrawDebugString(GetWorld(), Hit.ImpactPoint, CombinedString, nullptr, FColor::Green, 2.0f, true);
 	Explode();
 }

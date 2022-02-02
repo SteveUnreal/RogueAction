@@ -21,7 +21,13 @@ protected:
 
 	// Allows assignment through BP
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<AActor> ProjectileClass;
+	TSubclassOf<AActor> PrimaryProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TSubclassOf<AActor> SecondaryProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TSubclassOf<AActor> TeleportProjectileClass;
 
 	UPROPERTY(EditAnywhere)
 	FName PrimarySocketName;
@@ -57,9 +63,16 @@ protected:
 
 	void PrimaryAttack();
 
+	void SecondaryAttack();
+
 	void PrimaryInteract();
 
 	void PrimaryAttack_TimeElapsed();
+
+	void SecondaryAttack_TimeElapsed();
+
+	UPROPERTY(EditAnywhere)
+	float TraceDistance;
 
 public:	
 	// Called every frame

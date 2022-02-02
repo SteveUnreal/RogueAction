@@ -4,36 +4,35 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SGameplayInterface.h"
-#include "SItemChest.generated.h"
+#include "BaseProjectile.generated.h"
 
-class UStaticMeshComponent;
+class USphereComponent;
+class UProjectileMovementComponent;
+class UParticleSystemComponent;
+
 
 UCLASS()
-class ROGUEACTION_API ASItemChest : public AActor, public ISGameplayInterface
+class ROGUEACTION_API ABaseProjectile : public AActor
 {
 	GENERATED_BODY()
-
-	void Interact_Implementation(AActor* InstigatorPawn);
 	
 public:	
 	// Sets default values for this actor's properties
-	ASItemChest();
-
-	UPROPERTY(EditAnywhere)
-	float TargetPitch;
-
+	ABaseProjectile();
 
 protected:
-	
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ChestBottom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* ChestLid;
+	USphereComponent* SphereComp;
 
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsOpen;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UProjectileMovementComponent* MovementComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UParticleSystemComponent* EffectComp;
+
+	UPROPERTY(EditAnywhere)
+	float ProjectileSpeed;
 
 
 	// Called when the game starts or when spawned

@@ -32,20 +32,22 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* EffectComp;
 
+	UPROPERTY(VisibleAnywhere)
 	URadialForceComponent* RadialForceComp;
 
 	
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	float ImpulseStrength = 100.0f;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	float DamageRadius = 1000.0f;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void PostInitializeComponents();
 	void Explode();
 
 	UFUNCTION()
