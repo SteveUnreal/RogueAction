@@ -67,9 +67,13 @@ protected:
 
 	void PrimaryInteract();
 
+	void Teleport();
+
 	void PrimaryAttack_TimeElapsed();
 
 	void SecondaryAttack_TimeElapsed();
+
+	void Teleport_TimeElapsed();
 
 	UPROPERTY(EditAnywhere)
 	float TraceDistance;
