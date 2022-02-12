@@ -34,7 +34,10 @@ void ABlackholeProjectile::PostInitializeComponents() {
 
 void ABlackholeProjectile::DestroySelf()
 {
-	Destroy();
+	if (ensure(!IsPendingKill())) {
+		Destroy();
+	}
+	
 }
 
 

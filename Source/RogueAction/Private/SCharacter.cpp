@@ -8,6 +8,8 @@
 #include "SInteractionComponent.h"
 #include "GameFramework/Actor.h"
 #include "DrawDebugHelpers.h"
+#include "SAttributeComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
 
@@ -29,9 +31,19 @@ ASCharacter::ASCharacter()
 
 	bUseControllerRotationYaw = false;
 
+	AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
+
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	TraceDistance = 10000.0f;
+
+}
+
+void ASCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 
 }
 
@@ -128,6 +140,8 @@ void ASCharacter::PrimaryAttack_TimeElapsed()
 	}
 	else {
 		UE_LOG(LogTemp, Log, TEXT("Did not hit anything for aim line trace."));
+		FVector LineEndVec = End - HandLocation;
+		SpawnTM = FTransform(LineEndVec.Rotation(), HandLocation);
 
 	}
 
@@ -200,9 +214,8 @@ void ASCharacter::Teleport()
 	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::Teleport_TimeElapsed, 0.2f);
 }
 
-void ASCharacter::Teleport_TimeElapsed()
+bool ASCharacter::CheckBlockingHitForAttack(FHitResult& HitResult)
 {
-	// Line trace for impact point
 	FCollisionObjectQueryParams ObjectQueryParams;
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
@@ -211,11 +224,34 @@ void ASCharacter::Teleport_TimeElapsed()
 	FVector CameraLocation = CameraComp->GetComponentLocation();
 	FRotator CameraRotator = CameraComp->GetComponentRotation();
 
-	FHitResult HitResult;
+	FHitResult CheckHitResult;
 	FVector End = CameraLocation + (CameraRotator.Vector() * TraceDistance);
 
-	bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(HitResult, CameraLocation, End, ObjectQueryParams);
+	bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(CheckHitResult, CameraLocation, End, ObjectQueryParams);
+
+	HitResult = CheckHitResult;
+
+	return bBlockingHit;
+}
+
+void ASCharacter::Teleport_TimeElapsed()
+{
+	// Line trace for impact point
+	//FCollisionObjectQueryParams ObjectQueryParams;
+	//ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	//ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+
+	//// Get Screen center
+	//FVector CameraLocation = CameraComp->GetComponentLocation();
+	//FRotator CameraRotator = CameraComp->GetComponentRotation();
+
+	FHitResult HitResult;
+	//FVector End = CameraLocation + (CameraRotator.Vector() * TraceDistance);
+
+	//bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(HitResult, CameraLocation, End, ObjectQueryParams);
 	//DrawDebugLine(GetWorld(), CameraLocation, End, FColor::Red, false, 10.0f);
+
+	bool bBlockingHit = CheckBlockingHitForAttack(HitResult);
 
 	// To spawn from hand we can select the socket added to a bone or otherwise.
 	FVector HandLocation = GetMesh()->GetSocketLocation(PrimarySocketName);
@@ -240,6 +276,21 @@ void ASCharacter::Teleport_TimeElapsed()
 	SpawnParams.Instigator = this;
 
 	GetWorld()->SpawnActor<AActor>(TeleportProjectileClass, SpawnTM, SpawnParams);
+}
+
+void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
+{
+	if (Delta <= 0.0f && NewHealth != 0.0f)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SHOULD FLASH"));
+		USkeletalMeshComponent* MeshComp = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+		MeshComp->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
+	}
+
+	if (NewHealth <= 0.0f && Delta < 0.0f) {
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
+	}
 }
 
 // Called every frame

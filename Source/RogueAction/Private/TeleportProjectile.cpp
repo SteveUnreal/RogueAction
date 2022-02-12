@@ -33,10 +33,13 @@ void ATeleportProjectile::PostInitializeComponents()
 
 void ATeleportProjectile::Teleport()
 {
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleEmitter, GetActorLocation(), FRotator(0.0f, 0.0f, 0.0f), true);
-	APawn* ProjectileInstigator = GetInstigator();
-	ProjectileInstigator->TeleportTo(GetActorLocation(), GetInstigator()->GetActorRotation());
-	Destroy();
+	if (ensure(!IsPendingKill())) {
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ParticleEmitter, GetActorLocation(), FRotator(0.0f, 0.0f, 0.0f), true);
+		APawn* ProjectileInstigator = GetInstigator();
+		ProjectileInstigator->TeleportTo(GetActorLocation(), GetInstigator()->GetActorRotation());
+		Destroy();
+	}
+	
 }
 
 void ATeleportProjectile::Explode()

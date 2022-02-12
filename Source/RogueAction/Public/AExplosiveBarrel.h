@@ -18,6 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	AAExplosiveBarrel();
 
+	virtual void PostInitializeComponents() override;
+
 
 protected:
 
@@ -47,7 +49,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void PostInitializeComponents();
 	void Explode();
 
 	UFUNCTION()

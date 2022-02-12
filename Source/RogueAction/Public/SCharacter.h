@@ -10,6 +10,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class USInteractionComponent;
 class UAnimMontage;
+class USAttributeComponent;
 
 UCLASS()
 class ROGUEACTION_API ASCharacter : public ACharacter
@@ -52,6 +53,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	USInteractionComponent* InteractionComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USAttributeComponent* AttributeComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -69,6 +73,8 @@ protected:
 
 	void Teleport();
 
+	bool CheckBlockingHitForAttack(FHitResult& HitResult);
+
 	void PrimaryAttack_TimeElapsed();
 
 	void SecondaryAttack_TimeElapsed();
@@ -77,6 +83,11 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float TraceDistance;
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame
