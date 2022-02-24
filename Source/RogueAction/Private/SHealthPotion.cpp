@@ -22,7 +22,7 @@ void ASHealthPotion::Interact_Implementation(AActor* InstigatorPawn)
 
 		if (AttributeComp->GetCurrentHealth() != AttributeComp->GetMaxHealth()) {
 			Super::Interact_Implementation(InstigatorPawn);
-			AttributeComp->ApplyHealthChange(HealingValue);
+			AttributeComp->ApplyHealthChange(InstigatorPawn, HealingValue);
 		}
 		else {
 			UE_LOG(LogTemp, Log, TEXT("Ignoring actor because health is full."));
@@ -31,18 +31,3 @@ void ASHealthPotion::Interact_Implementation(AActor* InstigatorPawn)
 	}
 
 }
-
-// Called when the game starts or when spawned
-void ASHealthPotion::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ASHealthPotion::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

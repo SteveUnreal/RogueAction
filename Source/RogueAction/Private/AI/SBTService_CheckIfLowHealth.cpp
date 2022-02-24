@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "AI/SBTService_CheckIfLowHealth.h"
 #include "SAttributeComponent.h"
 #include "AI/SAICharacter.h"
 #include "AI/SAIController.h"
-#include "AI/SBTService_CheckIfLowHealth.h"
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -22,7 +22,7 @@ void USBTService_CheckIfLowHealth::TickNode(UBehaviorTreeComponent& OwnerComp, u
 		if (ensure(MyController)) {
 			APawn* MyPawn = MyController->GetPawn();
 			if (ensure(MyPawn)) {
-				UE_LOG(LogTemp, Log, TEXT("MyCharacter is valid."));
+				//UE_LOG(LogTemp, Log, TEXT("MyCharacter is valid."));
 				USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(MyPawn->GetComponentByClass(USAttributeComponent::StaticClass()));
 				if (AttributeComp) {
 					float CurrentHealth = AttributeComp->GetCurrentHealth();

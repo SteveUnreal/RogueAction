@@ -19,16 +19,10 @@ public:
 	ASHealthPotion();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly)
 	float HealingValue;
 
 	virtual void Interact_Implementation(AActor* InstigatorPawn) override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };
