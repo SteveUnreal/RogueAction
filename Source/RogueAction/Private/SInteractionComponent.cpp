@@ -6,6 +6,10 @@
 #include "../Private/KismetTraceUtils.h"
 #include "SGameplayInterface.h"
 
+
+static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(TEXT("ra.DebugDrawInteraction"), true, TEXT("Toggle Debug Lines for Interact Component."), ECVF_Cheat);
+
+
 // Sets default values for this component's properties
 USInteractionComponent::USInteractionComponent()
 {
@@ -38,6 +42,9 @@ void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void USInteractionComponent::PrimaryInteract()
 {
+
+	bool bDebugDraw = CVarDebugDrawInteraction.GetValueOnGameThread();
+
 	FCollisionObjectQueryParams ObjectQueryParams;
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);  // Set the objects to query against
 
@@ -89,12 +96,18 @@ void USInteractionComponent::PrimaryInteract()
 			APawn* MyPawn = Cast<APawn>(MyOwner);
 			ISGameplayInterface::Execute_Interact(HitActor, MyPawn);
 		}
-
 	}
-	DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, HitRadius, 32, LineColor, false, 2.0f);
-	/*DrawDebugSphere(GetWorld(), Hit.ImpactPoint, HitRadius, 32, LineColor, false, 2.0f);*/
+
+	if (bDebugDraw) {
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, HitRadius, 32, LineColor, false, 2.0f);
+		/*DrawDebugSphere(GetWorld(), Hit.ImpactPoint, HitRadius, 32, LineColor, false, 2.0f);*/
+	}
 	
-	DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+	
+	if (bDebugDraw) {
+		DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+	}
+	
 
 
 

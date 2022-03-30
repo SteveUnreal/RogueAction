@@ -11,6 +11,7 @@ class UCameraComponent;
 class USInteractionComponent;
 class UAnimMontage;
 class USAttributeComponent;
+class USActionComponent;
 
 UCLASS()
 class ROGUEACTION_API ASCharacter : public ACharacter
@@ -56,12 +57,19 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USAttributeComponent* AttributeComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void MoveForward(float Value);
 
 	void MoveRight(float Value);
+
+	void SprintStart();
+	
+	void SprintStop();
 
 	void Jump();
 
@@ -88,6 +96,11 @@ protected:
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 	virtual void PostInitializeComponents() override;
+
+	UFUNCTION(Exec)
+	void HealSelf(float Amount = 100.0f);
+
+	virtual FVector GetPawnViewLocation() const override;
 
 public:	
 	// Called every frame
